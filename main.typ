@@ -60,12 +60,7 @@ $integral integral$
 
 ]
 
-#slide(title: "Tables")[
-  #lorem(10)
-]
 
-#subslide(title: "Multicol Tables")[
-]
 
 
 
@@ -73,16 +68,6 @@ $integral integral$
 // #focus-slide[
 //   Another variant with primary color in background...
 // ]
-
-#slide(title: "Title")[wf]
-
-#slide(title: "Theorem Boxes")[
-  #theorem(title: "Pythagoras")[For a right triangle, $a^2 + b^2 = c^2$.] <thm-pyth>
-  #pause
-  #lemma[Every bounded monotone sequence converges.]
-  #prop[This follows from @thm-pyth.]
-  #note[Notes are not numbered.]
-]
 
 // #matrix-slide(columns:3, title:"efef")[left][middle][right]
 
