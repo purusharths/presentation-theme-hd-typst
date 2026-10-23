@@ -1,15 +1,16 @@
 // University theme Originally contributed by Pol Dellaiera - https://github.com/drupol
 
 #import "@preview/touying:0.6.1": *
+#import "settings.typ": settings
 
 
 // titles of the current slide / subslide / subsubslide, used to build the header trail
 #let slide-titles = state("university-slide-titles", ())
 
 #let subheading-text(it) = text(
-  font: "Noto Serif Khmer",
-  size: 25pt,
-  fill: rgb(190, 190, 190),
+  font: settings.font.subheader,
+  size: settings.size.subheader,
+  fill: settings.color.subheader,
   [ \/ #it],
 )
 
@@ -46,7 +47,13 @@
       block(
         inset: (x: 1.0em),
         components.left-and-right(
-          text(fill: self.colors.primary, weight: "bold", size: 1.5em, utils.call-or-display(self, self.store.header)),
+          text(
+            fill: settings.color.header,
+            font: settings.font.header,
+            weight: "bold",
+            size: settings.size.header,
+            utils.call-or-display(self, self.store.header),
+          ),
           text(fill: self.colors.primary.lighten(65%), utils.call-or-display(self, self.store.header-right)),
         ),
       ),
@@ -54,14 +61,15 @@
   }
   let footer(self) = {
     set std.align(center + bottom)
-    set text(size: .4em)
+    set text(size: settings.size.footer, font: settings.font.footer, fill: settings.color.footer)
     {
       let cell(..args, it) = components.cell(
         ..args,
         inset: 1mm,
-        std.align(horizon, text(fill: white, it)),
+        std.align(horizon, it),
       )
-      show: block.with(width: 100%, height: auto)
+      // shaded bar behind the footer only
+      show: block.with(width: 100%, height: auto, fill: settings.color.footer-bg)
       grid(
         columns: self.store.footer-columns,
         rows: 1.5em,
@@ -134,7 +142,7 @@
           inset: 0em,
           breakable: false,
           {
-            text(size: 2em, fill: self.colors.primary, strong(info.title))
+            text(size: settings.size.title, fill: self.colors.primary, strong(info.title))
             if info.subtitle != none {
               parbreak()
               text(size: 1.2em, fill: self.colors.primary, info.subtitle)
@@ -146,9 +154,9 @@
           columns: (1fr,) * calc.min(info.authors.len(), 3),
           column-gutter: 1em,
           row-gutter: 1em,
-          ..info.authors.map(author => text(fill: self.colors.neutral-darkest,
+          ..info.authors.map(author => text(fill: settings.color.author,
                                             size: 0.82em,
-                                            font: "Cascadia Code",
+                                            font: settings.font.author,
                                             author))
         )
         v(1em)
@@ -194,7 +202,7 @@
           if current != none and h.location() == current.location() {
             text(fill: self.colors.primary, weight: "bold", h.body)
           } else {
-            text(fill: rgb(190, 190, 190), h.body)
+            text(fill: settings.color.subheader, h.body)
           }
         }),
       )
@@ -204,7 +212,7 @@
       column-gutter: 3em,
       align: (left + horizon, center + horizon, left + horizon),
       {
-        set text(size: 1.5em, fill: self.colors.primary, weight: "bold")
+        set text(size: settings.size.section, fill: self.colors.primary, weight: "bold")
         stack(
           dir: ttb,
           spacing: .65em,
@@ -217,7 +225,7 @@
           ),
         )
       },
-      line(angle: 90deg, length: 40%, stroke: 1pt + rgb(190, 190, 190)),
+      line(angle: 90deg, length: 40%, stroke: 1pt + settings.color.subheader),
       section-list,
     )
     body
@@ -286,21 +294,14 @@ header: text(
     self.info.title + "fe"
   } else {
     set align(left)
-      text( 
-        fill:rgb(100,100,100),
+      text(
         weight: "extrabold",
-        font: "Cascadia Code",
-        // 
         context h(5%) +self.info.short-title + " -> " + utils.display-current-heading(level:1) //+ " / " + utils.display-current-heading(level:2) + " / " + utils.display-current-heading(level:3) 
     )
   
   },
   footer-b: self => text(
-    // fill: rgb(17,40,57),
-    fill:rgb(100,100,100),
-    font: "Cascadia Code",
     weight: "semibold",
-    
     self.info.author + "  [ "+ self.info.small_institute +" ]"),
   footer-c: self => {
     
@@ -308,8 +309,6 @@ header: text(
     utils.display-info-date(self)
     h(1fr)
   text(
-    fill:rgb(100,100,100),
-    font: "Cascadia Code",
     weight: "extrabold",
     // appendix slides (after #show: appendix) are not part of the total
     if self.at("appendix", default: false) {
@@ -336,20 +335,30 @@ header: text(
     ),
     config-methods(
       init: (self: none, body) => {
-        set text(size: 25pt)
+        set text(size: settings.size.body, font: settings.font.body, fill: settings.color.body)
+        show figure.caption: set text(size: settings.size.caption, fill: settings.color.caption)
+        // tables: colored header row, striped body rows
+        set table(
+          stroke: none,
+          inset: (x: .7em, y: .45em),
+          fill: (_, y) => if y == 0 { settings.color.table-header } else if calc.even(y) { settings.color.table-stripe },
+        )
+        show table: set text(size: settings.size.table)
+        show table.cell.where(y: 0): set text(fill: settings.color.table-header-text, weight: "bold")
         // show heading.where(level: 3): set text(fill: self.colors.primary, baseline: 10pt)
         // show heading.where(level: 4): set text(fill: self.colors.primary)
         // line(length: 100%)
         body
       },
-      alert: utils.alert-with-primary-color,
+      // *bold* and #alert use settings.color.bold
+      alert: (self: none, it) => text(fill: settings.color.bold, it),
     ),
     config-colors(
-      primary: rgb("#04364A"),
-      secondary: rgb("#176B87"),
-      tertiary: rgb("#448C95"),
-      neutral-lightest: rgb("#ffffff"),
-      neutral-darkest: rgb("#000000"),
+      primary: settings.color.main,
+      secondary: settings.color.secondary,
+      tertiary: rgb(255, 255, 255),
+      neutral-lightest: settings.color.footer-bg,
+      neutral-darkest: settings.color.author,
     ),
     // save the variables for later use
     config-store(
